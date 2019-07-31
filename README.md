@@ -1,2 +1,9 @@
-# suitcase-nxstxm
-a NEXUS suitcase data exporter for the nxstxm application definition
+# suitcase.nxstxm
+
+This is a suitcase subpackage for writing a particular file format.
+
+## Installation
+
+```
+pip install suitcase-nxstxm
+```
