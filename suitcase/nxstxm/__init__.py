@@ -82,12 +82,16 @@ def finish_export(data_dir, file_prefix, uid):
     :return:
     '''
     #tmp_fname = os.path.join(data_dir, '%s.hdf5.tmp' % file_prefix)
-    tmp_fname = os.path.join(data_dir, '%s-%s' % (uid, file_prefix))
-    final_fname = tmp_fname.replace('.tmp', '')
-    final_fname = final_fname.replace('%s-' % uid, '') + '.hdf5'
-    os.rename(tmp_fname, final_fname)
-    print('nxstxm: finished exporting [%s]' % final_fname)
-    _logger.info('nxstxm: finished exporting [%s]' % final_fname)
+    try:
+        tmp_fname = os.path.join(data_dir, '%s-%s' % (uid, file_prefix))
+        final_fname = tmp_fname.replace('.tmp', '')
+        final_fname = final_fname.replace('%s-' % uid, '') + '.hdf5'
+        os.rename(tmp_fname, final_fname)
+        print('nxstxm: finished exporting [%s]' % final_fname)
+        _logger.info('nxstxm: finished exporting [%s]' % final_fname)
+    except:
+        _logger.info('finish_export: no file to rename')
+        print('finish_export: no file to rename')
 
 
 def test_can_do_tmp_file(data_dir, file_prefix):
@@ -183,7 +187,6 @@ def export(gen, directory, file_prefix='{uid}-', **kwargs):
         for item in gen:
             #print('ITEM:', item)
             serializer(*item)
-
     return serializer.artifacts
 
 
@@ -243,7 +246,6 @@ class Serializer(event_model.DocumentRouter):
         self._processed_sp_ids = []
         self._cur_sp_id = None
         self._data = {}
-
         self._start_found = False
         self._nf = None
 
@@ -319,7 +321,10 @@ class Serializer(event_model.DocumentRouter):
         for k in _metadata_dct.keys():
             self._cur_scan_md[doc['uid']][k] = _metadata_dct[k]
 
-        if('first_uid' not in _metadata_dct.keys()):
+        for k in self._kwargs.keys():
+            self._cur_scan_md[doc['uid']][k] = self._kwargs[k]
+
+        if('first_uid' not in self._kwargs.keys()):
             #assume there is only one scan uid and set it here
             self._cur_scan_md[doc['uid']]['first_uid'] = doc['uid']
 
@@ -505,6 +510,7 @@ class Serializer(event_model.DocumentRouter):
 
             nf.close()
         except:
+            print("save_single_entry_scan: Unexpected error:", sys.exc_info()[0])
             _logger.info('Problem saving file[%s]' % self._tmp_fname)
             if (nf is not None):
                 nf.close()
@@ -551,7 +557,7 @@ class Serializer(event_model.DocumentRouter):
 
             nf.close()
         except:
-            print("Unexpected error:", sys.exc_info()[0])
+            print("save_multi_entry_scan: Unexpected error:", sys.exc_info()[0])
             raise
             print('Problem saving file[%s]' % self._tmp_fname)
             _logger.error('Problem saving file[%s]' % self._tmp_fname)
@@ -614,7 +620,7 @@ class Serializer(event_model.DocumentRouter):
 
             nf.close()
         except:
-            print("Unexpected error:", sys.exc_info()[0])
+            print("save_point_spec_entry_scan: Unexpected error:", sys.exc_info()[0])
             raise
             print('Problem saving file[%s]' % self._tmp_fname)
             _logger.error('Problem saving file[%s]' % self._tmp_fname)
@@ -1278,53 +1284,67 @@ class Serializer(event_model.DocumentRouter):
 
                 '''
         # add the stop doc to self._meta.
-        stop_time = localtime(doc['time'])
-        self._stop_time_str = time.strftime("%Y-%m-%dT%H:%M:%S", stop_time)
-        scan_type = self._cur_scan_md[doc['run_start']]['scan_type']
+        try:
+            print('suitcase-nxstm: stop', doc)
+            if('time' not in doc.keys()):
+                print('WHATS wrong with this stop doc? leaving')
+                return
 
-        dets = {}
-        skip_list = ['_units']
-        if('primary' not in list(self._data.keys())):
-            #if the scan was aborted/stopped midway there is likely not going to be a primary data stream for the scan
-            #iteration that the scan was on, so just skip it so we can save whatever data we have
-            return
+            stop_time = localtime(doc['time'])
+            self._stop_time_str = time.strftime("%Y-%m-%dT%H:%M:%S", stop_time)
+            scan_type = self._cur_scan_md[doc['run_start']]['scan_type']
 
-        for k, v in self._data['primary'].items():
-            if (not self._skip(k, skip_list)):
-                dlst = self._data['primary'][k][self._cur_uid]['data']
-                arr = np.array(dlst)
-                dets[k] = arr
+            dets = {}
+            skip_list = ['_units']
+            if('primary' not in list(self._data.keys())):
+                #if the scan was aborted/stopped midway there is likely not going to be a primary data stream for the scan
+                #iteration that the scan was on, so just skip it so we can save whatever data we have
+                #print('stop: scan was aborted because no primary datastream exists therefore there is no way to save anything')
+                #_logger.error('stop: scan was aborted because no primary datastream exists therefore there is no way to save anything')
+                return
 
-        if (doc['uid'] in self._streamnames.keys()):
-            streamname = self._streamnames[doc['uid']]
-        else:
-            pass
+            for k, v in self._data['primary'].items():
+                if (not self._skip(k, skip_list)):
+                    dlst = self._data['primary'][k][self._cur_uid]['data']
+                    arr = np.array(dlst)
+                    dets[k] = arr
 
-        has_baseline = False
-        for k, v in self._streamnames.items():
-            if(v.find('baseline') > -1):
-                has_baseline = True
+            if (doc['uid'] in self._streamnames.keys()):
+                streamname = self._streamnames[doc['uid']]
+            else:
+                pass
 
-        if(self._cur_scan_md[doc['run_start']]['first_uid'] == self._cur_uid):
-            if (not os.path.exists(self._tmp_fname)):
-                self.create_file_attrs()
+            has_baseline = False
+            for k, v in self._streamnames.items():
+                if(v.find('baseline') > -1):
+                    has_baseline = True
 
-        if (has_baseline):
-            self.create_entry_structure(doc, scan_type=scan_type)
-            self._processed_sp_ids.append(self._sp_id)
-        else:
-            # this is an ev only run so just update the data
-            #print('modifying data to an existing entry')
-            uid = self.get_current_uid()
-            det_nm = self.get_primary_det_nm(uid)
-            det_prfx = self.get_primary_det_prefix(uid)
-            dat_arr = np.array(self._data['primary'][det_nm][uid]['data'])
+            if(self._cur_scan_md[doc['run_start']]['first_uid'] == self._cur_uid):
+                if (not os.path.exists(self._tmp_fname)):
+                    self.create_file_attrs()
 
-            #now place it in correct entry/counter/data
-            self.modify_entry_data(self._entry_nm, det_prfx, dat_arr)
+            if (has_baseline):
+                self.create_entry_structure(doc, scan_type=scan_type)
+                self._processed_sp_ids.append(self._sp_id)
+            else:
+                # this is an ev only run so just update the data
+                #print('modifying data to an existing entry')
+                uid = self.get_current_uid()
+                det_nm = self.get_primary_det_nm(uid)
+                det_prfx = self.get_primary_det_prefix(uid)
+                dat_arr = np.array(self._data['primary'][det_nm][uid]['data'])
 
-        # reset scan_type
-        self._scan_type = None
+                #now place it in correct entry/counter/data
+                self.modify_entry_data(self._entry_nm, det_prfx, dat_arr)
+
+            # reset scan_type
+            self._scan_type = None
+            print('suitcase-nxstxm: leaving stop function')
+
+        except :
+            print('stop: ERROR')
+            _logger.error('Problem modifying data in [%s]' % self._tmp_fname)
+
 
 
     def modify_entry_data(self, entry_nm, det_prfx, data):
