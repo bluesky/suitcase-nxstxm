@@ -24,7 +24,7 @@ two_posner_scans = [scan_types.DETECTOR_IMAGE.value, scan_types.OSA_IMAGE.value,
                     scan_types.COARSE_GONI_SCAN.value , scan_types.SAMPLE_IMAGE.value, scan_types.GENERIC_SCAN.value]
 single_entry_scans = [scan_types.DETECTOR_IMAGE, scan_types.OSA_IMAGE, scan_types.OSA_FOCUS , scan_types.SAMPLE_FOCUS , \
                       scan_types.SAMPLE_LINE_SPECTRA , scan_types.SAMPLE_IMAGE , scan_types.COARSE_IMAGE_SCAN, \
-					  scan_types.COARSE_GONI_SCAN, scan_types.GENERIC_SCAN]
+					  scan_types.COARSE_GONI_SCAN, scan_types.GENERIC_SCAN, scan_types.PATTERN_GEN_SCAN]
 multi_entry_scans = [scan_types.SAMPLE_IMAGE_STACK , scan_types.SAMPLE_POINT_SPECTRA, scan_types.TOMOGRAPHY_SCAN]
 single_2d_scans = [scan_types.DETECTOR_IMAGE, scan_types.OSA_IMAGE, scan_types.COARSE_IMAGE_SCAN, \
                            scan_types.COARSE_GONI_SCAN]
