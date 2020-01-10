@@ -29,7 +29,7 @@ multi_entry_scans = [scan_types.SAMPLE_IMAGE_STACK , scan_types.SAMPLE_POINT_SPE
 single_2d_scans = [scan_types.DETECTOR_IMAGE, scan_types.OSA_IMAGE, scan_types.COARSE_IMAGE_SCAN, \
                            scan_types.COARSE_GONI_SCAN]
 focus_scans = [ scan_types.SAMPLE_FOCUS, scan_types.OSA_FOCUS]
-single_image_scans = [scan_types.SAMPLE_IMAGE]
+single_image_scans = [scan_types.SAMPLE_IMAGE, scan_types.PATTERN_GEN_SCAN]
 stack_type_scans = [scan_types.SAMPLE_IMAGE_STACK, scan_types.TOMOGRAPHY_SCAN]
 spectra_type_scans = [scan_types.SAMPLE_POINT_SPECTRA, scan_types.GENERIC_SCAN]
 line_spec_scans = [scan_types.SAMPLE_LINE_SPECTRA]
