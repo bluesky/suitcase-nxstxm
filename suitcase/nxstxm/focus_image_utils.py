@@ -96,7 +96,7 @@ def modify_focus_ctrl_str_attrs(parent, nxgrp, doc):
     rois = parent.get_rois_from_current_md(doc['run_start'])
     x_posnr_nm = parent.fix_posner_nm(dct_get(rois, SPDB_XPOSITIONER))
     y_posnr_nm = parent.fix_posner_nm(dct_get(rois, SPDB_YPOSITIONER))
-    z_posnr_nm = parent.fix_posner_nm(dct_get(rois, SPDB_ZPOSITIONER))
+    z_posnr_nm = parent.fix_posner_nm(dct_get(rois, SPDB_ZZPOSITIONER))
 
     _string_attr(nxgrp, 'axes', [z_posnr_nm, y_posnr_nm, x_posnr_nm])
 
@@ -157,7 +157,7 @@ def modify_focus_nxdata_group(parent, data_nxgrp, doc, scan_type):
 
     det_nm = parent.get_primary_det_nm(doc['run_start'])
 
-    three_d_scans = [scan_types.OSA_FOCUS.value, scan_types.SAMPLE_FOCUS.value]
+    three_d_scans = [scan_types.OSA_FOCUS, scan_types.SAMPLE_FOCUS]
 
     if(scan_types(scan_type) in three_d_scans):
         # det_data = np.array(parent._data['primary'][det_nm]['data'], dtype=np.float32).reshape((1, ynpoints, xnpoints))
@@ -170,7 +170,8 @@ def modify_focus_nxdata_group(parent, data_nxgrp, doc, scan_type):
         if (resize_data):
             det_data = parent.fix_aborted_data(det_data, ttl_pnts)
 
-        det_data = np.reshape(det_data, (1, zznpoints, xnpoints))
+        #det_data = np.reshape(det_data, (1, zznpoints, xnpoints))
+        det_data = np.reshape(det_data, (zznpoints, xnpoints))
 
     else:
         # det_data = np.array(parent._data['primary'][det_nm]['data'], dtype=np.float32).reshape((ynpoints, xnpoints))
