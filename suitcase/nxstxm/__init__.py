@@ -1032,9 +1032,6 @@ class Serializer(event_model.DocumentRouter):
         _dataset(cntrl_nxgrp, nxkd.SAMPLE_X, self.get_sample_x_data('start'), 'NX_FLOAT')
         _dataset(cntrl_nxgrp, nxkd.SAMPLE_Y, self.get_sample_y_data('start'), 'NX_FLOAT')
 
-        _dataset(cntrl_nxgrp, nxkd.EPU_OFFSET, [self.get_baseline_start_data(epu_offset_src)], 'NX_FLOAT')
-        _dataset(cntrl_nxgrp, nxkd.EPU_POLARIZATION, [self.get_baseline_start_data(epu_pol_src)], 'NX_FLOAT')
-
         _string_attr(cntrl_nxgrp, 'signal', 'data')
         return(cntrl_nxgrp)
 
@@ -1124,6 +1121,8 @@ class Serializer(event_model.DocumentRouter):
             ev_setpoints = self._wdg_com['SINGLE_LST']['EV_ROIS']
 
         num_ev_points = len(ev_setpoints)
+        if(num_ev_points < 1):
+            num_ev_points = 1
         _dataset(data_nxgrp, 'count_time', make_1d_array(num_ev_points, dwell), 'NX_FLOAT')
 
         ev_src = self.get_devname(DNM_ENERGY)
@@ -1131,9 +1130,15 @@ class Serializer(event_model.DocumentRouter):
         _dataset(data_nxgrp, nxkd.SAMPLE_X, xdata, 'NX_FLOAT')
         _dataset(data_nxgrp, nxkd.SAMPLE_Y, ydata, 'NX_FLOAT')
 
-        pol_src = self.get_devname(DNM_EPU_POLARIZATION, do_warn=False)
-        if (pol_src):
-            _dataset(data_nxgrp, 'epu_polarization', self.get_baseline_start_data(pol_src), 'NX_FLOAT')
+        # pol_src = self.get_devname(DNM_EPU_POLARIZATION, do_warn=False)
+        # if (pol_src):
+        #     _dataset(data_nxgrp, 'epu_polarization', self.get_baseline_start_data(pol_src), 'NX_FLOAT')
+        epu_pol_src = self.get_devname(DNM_EPU_POLARIZATION, do_warn=False)
+        if (epu_pol_src):
+            # then EPU is supported
+            epu_offset_src = self.get_devname(DNM_EPU_OFFSET)
+            _dataset(data_nxgrp, nxkd.EPU_OFFSET, [self.get_baseline_start_data(epu_offset_src)], 'NX_FLOAT')
+            _dataset(data_nxgrp, nxkd.EPU_POLARIZATION, [self.get_baseline_start_data(epu_pol_src)], 'NX_FLOAT')
 
         scan_type_str = self.get_stxm_scan_type_str(doc['run_start'])
         _dataset(data_nxgrp, 'stxm_scan_type', scan_type_str, 'NX_CHAR')
@@ -1162,9 +1167,15 @@ class Serializer(event_model.DocumentRouter):
         _dataset(data_nxgrp, nxkd.SAMPLE_X, self.get_sample_x_data('start'), 'NX_FLOAT')
         _dataset(data_nxgrp, nxkd.SAMPLE_Y, self.get_sample_y_data('start'), 'NX_FLOAT')
 
-        pol_src = self.get_devname(DNM_EPU_POLARIZATION, do_warn=False)
-        if (pol_src):
-            _dataset(data_nxgrp, 'epu_polarization', self.get_baseline_start_data(pol_src), 'NX_FLOAT')
+        # pol_src = self.get_devname(DNM_EPU_POLARIZATION, do_warn=False)
+        # if (pol_src):
+        #     _dataset(data_nxgrp, 'epu_polarization', self.get_baseline_start_data(pol_src), 'NX_FLOAT')
+        epu_pol_src = self.get_devname(DNM_EPU_POLARIZATION, do_warn=False)
+        if (epu_pol_src):
+            # then EPU is supported
+            epu_offset_src = self.get_devname(DNM_EPU_OFFSET)
+            _dataset(data_nxgrp, nxkd.EPU_OFFSET, [self.get_baseline_start_data(epu_offset_src)], 'NX_FLOAT')
+            _dataset(data_nxgrp, nxkd.EPU_POLARIZATION, [self.get_baseline_start_data(epu_pol_src)], 'NX_FLOAT')
 
         scan_type_str = self.get_stxm_scan_type_str(doc['run_start'])
         _dataset(data_nxgrp, 'stxm_scan_type', scan_type_str, 'NX_CHAR')
