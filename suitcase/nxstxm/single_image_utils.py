@@ -110,9 +110,14 @@ def modify_single_image_nxdata_group(parent, data_nxgrp, doc, scan_type):
     #uid = list(parent._cur_scan_md.keys())[0]
     uid = parent.get_current_uid()
     primary_det_nm = parent.get_primary_det_nm(uid)
-    #prim_data_lst = parent._data['primary'][primary_det_nm]['data']
     prim_data_arr = np.array(parent._data['primary'][primary_det_nm][uid]['data'])
-    rows, cols = prim_data_arr.shape
+
+    if(scan_types(scan_type) is scan_types.PATTERN_GEN_SCAN):
+        rows, cols = ynpoints, xnpoints
+    else:
+        rows, cols = prim_data_arr.shape
+    #rows, cols = prim_data_arr.shape
+
 
     if ((rows * cols) < ttlpnts):
         #scn had been aborted
