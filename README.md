@@ -7,3 +7,11 @@ This is a suitcase subpackage for writing a particular file format.
 ```
 pip install suitcase-nxstxm
 ```
+
+## Quick Start
+
+TODO
+
+## Documentation
+
+See the [suitcase documentation](https://nsls-ii.github.io/suitcase).
