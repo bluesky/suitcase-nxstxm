@@ -9,7 +9,7 @@ In order for the nxstxm package to be correctly built and installed into the dir
 
     lib/site-packages/suitcase/nxstxm
 
-the build must be performed by typing the following on the command line:
+the build must be performed by typing the following on the command line from inside the repo directory:
 ```
 pip install .
 ```
@@ -401,4 +401,4 @@ line_spec_scans = [scan_types.SAMPLE_LINE_SPECTRA]
 
 ## Documentation
 
-See the [suitcase documentation](https://blueskyproject.io/suitcase/).
+See the [suitcase documentation](https://blueskyproject.io/suitcase).
