@@ -661,8 +661,7 @@ class Serializer(event_model.DocumentRouter):
         try:
             self.specific_scan_funcs = self.get_scan_specific_funcs(self._scan_type)
             uid = self.get_current_uid()
-            primary_det_nm = self.get_primary_det_nm(uid)
-            prim_data_arr = np.array(self._data['primary'][primary_det_nm][uid]['data'])
+
             num_spids = len(self._sp_id_lst)
             coll_nxgrp = None
             nf = self._nf = h5py.File(self._tmp_fname, 'a')
@@ -672,7 +671,7 @@ class Serializer(event_model.DocumentRouter):
                 self._cur_sp_id = sp_id
 
                 #all spid data is in one long array, get this sp_ids data by slicing every nth value
-                data = prim_data_arr[i::num_spids]
+                #data = prim_data_arr[i::num_spids]
 
                 entry_nxgrp = _group(nf, 'entry%s' % sp_id, 'NXentry')
                 _string_attr(nf, 'default', 'entry%s' % sp_id)
