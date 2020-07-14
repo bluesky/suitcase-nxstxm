@@ -1267,12 +1267,15 @@ class Serializer(event_model.DocumentRouter):
         '''
         rois = self.get_rois_from_current_md(doc['run_start'])
         dwell = self._cur_scan_md[doc['run_start']]['dwell'] * 0.001
-        # det_nm = parent.get_primary_det_nm(doc['run_start'])
-        #scan_type = parent.get_stxm_scan_type(doc['run_start'])
+        scan_type = parent.get_stxm_scan_type(doc['run_start'])
         uid = self.get_current_uid()
         ttlpnts = int(rois[SPDB_X][NPOINTS] * rois[SPDB_Y][NPOINTS])
-
-        det_data = np.array(self._data['primary'][det_nm][uid]['data'])  # .reshape((ynpoints, xnpoints))
+        if(scan_type == scan_types.SAMPLE_POINT_SPECTRUM.value):
+            #need to slice the 1d array data into num spatial ids
+            det_data = np.array(self._data['primary'][det_nm][uid]['data'][::len(self._sp_id_lst)])  # .reshape((ynpoints, xnpoints))
+        else:
+            #take teh entire 1d array
+            det_data = np.array(self._data['primary'][det_nm][uid]['data'])
         self.make_detector(inst_nxgrp, det_nm, det_data, dwell, ttlpnts, units='counts')
 
 
