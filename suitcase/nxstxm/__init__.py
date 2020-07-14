@@ -912,7 +912,6 @@ class Serializer(event_model.DocumentRouter):
         else:
             ttlpnts = xnpoints * ynpoints
 
-        #epnts = self.get_baseline_all_data(self.get_devname(DNM_MONO_EV_FBK) + '_val')
         epnts = self.get_baseline_all_data(self.get_devname(DNM_MONO_EV_FBK))
         #just use the value of energy at start
         epnt = epnts[0]
@@ -1025,7 +1024,6 @@ class Serializer(event_model.DocumentRouter):
         :return:
         '''
         if (not modify):
-            #ring_cur_signame = self.get_devname(DNM_RING_CURRENT) + '_val'
             ring_cur_signame = self.get_devname(DNM_RING_CURRENT)
             if (ring_cur_signame in self._data['baseline'].keys()):
                 rois = self.get_rois_from_current_md(doc['run_start'])

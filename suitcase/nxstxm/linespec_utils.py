@@ -82,7 +82,6 @@ def modify_line_spectra_ctrl_data_grps(parent, nxgrp, doc, scan_type):
     _dataset(nxgrp, 'energy', evdata, 'NX_FLOAT')
 
     # this should be an array the same shape as the 'data' group in NXdata filled with the storagering current
-    #ring_cur_signame = parent.get_devname(DNM_RING_CURRENT) + '_val'
     ring_cur_signame = parent.get_devname(DNM_RING_CURRENT)
     if(ring_cur_signame not in parent._data.keys()):
         #use the baseline start/stop values and create a sequence from start to stop

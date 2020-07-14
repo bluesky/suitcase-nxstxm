@@ -61,7 +61,6 @@ def modify_stack_ctrl_data_grps(parent, nxgrp, doc, scan_type):
     _dataset(nxgrp, nxkd.SAMPLE_X, xdata, 'NX_FLOAT')
 
     # this should be an array the same shape as the 'data' group in NXdata filled with the storagering current
-    #_sr_data = parent.get_baseline_all_data(parent.get_devname(DNM_RING_CURRENT) + '_val')
     _sr_data = parent.get_baseline_all_data(parent.get_devname(DNM_RING_CURRENT))
     sr_data = np.linspace(_sr_data[0], _sr_data[1], ttlpnts)
 
