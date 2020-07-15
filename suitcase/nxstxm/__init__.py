@@ -1267,7 +1267,7 @@ class Serializer(event_model.DocumentRouter):
         '''
         rois = self.get_rois_from_current_md(doc['run_start'])
         dwell = self._cur_scan_md[doc['run_start']]['dwell'] * 0.001
-        scan_type = parent.get_stxm_scan_type(doc['run_start'])
+        scan_type = self.get_stxm_scan_type(doc['run_start'])
         uid = self.get_current_uid()
         ttlpnts = int(rois[SPDB_X][NPOINTS] * rois[SPDB_Y][NPOINTS])
         if(scan_type == scan_types.SAMPLE_POINT_SPECTRUM.value):
