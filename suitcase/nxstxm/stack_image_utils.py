@@ -61,7 +61,7 @@ def modify_stack_ctrl_data_grps(parent, nxgrp, doc, scan_type):
     _dataset(nxgrp, nxkd.SAMPLE_X, xdata, 'NX_FLOAT')
 
     # this should be an array the same shape as the 'data' group in NXdata filled with the storagering current
-    _sr_data = parent.get_baseline_all_data(parent.get_devname(DNM_RING_CURRENT) + '_val')
+    _sr_data = parent.get_baseline_all_data(parent.get_devname(DNM_RING_CURRENT))
     sr_data = np.linspace(_sr_data[0], _sr_data[1], ttlpnts)
 
     _dataset(nxgrp, 'data', np.reshape(sr_data, (num_ev_points, ynpoints, xnpoints)), 'NX_NUMBER')
@@ -101,8 +101,8 @@ def modify_stack_nxdata_group(parent, data_nxgrp, doc, scan_type):
     y_posnr_nm = parent.fix_posner_nm(rois[SPDB_Y][POSITIONER])
     # y_posnr_src = rois[SPDB_Y]['SRC']
 
-    xnpoints = rois[SPDB_X]['NPOINTS']
-    ynpoints = rois[SPDB_Y]['NPOINTS']
+    xnpoints = int(rois[SPDB_X][NPOINTS])
+    ynpoints = int(rois[SPDB_Y][NPOINTS])
     ttlpnts = xnpoints * ynpoints
     #prim_data_lst = parent._data['primary'][x_src]['data']
     #uid = list(parent._cur_scan_md.keys())[0]
@@ -110,7 +110,7 @@ def modify_stack_nxdata_group(parent, data_nxgrp, doc, scan_type):
     primary_det_nm = parent.get_primary_det_nm(uid)
     #prim_data_lst = parent._data['primary'][primary_det_nm]['data']
     prim_data_arr = np.array(parent._data['primary'][primary_det_nm][uid]['data'])
-    if(scan_types(scan_type) is scan_types.SAMPLE_POINT_SPECTRA):
+    if(scan_types(scan_type) is scan_types.SAMPLE_POINT_SPECTRUM):
         rows = 1
         cols, = prim_data_arr.shape
     else:
@@ -149,7 +149,7 @@ def modify_stack_nxdata_group(parent, data_nxgrp, doc, scan_type):
     _string_attr(data_nxgrp, 'axes', ['energy', nxkd.SAMPLE_Y, nxkd.SAMPLE_X])
     _string_attr(data_nxgrp, 'signal', 'data')
 
-    det_nm = parent.get_primary_det_nm(doc['run_start'])
+    det_nm = data_nxgrp.name.split('/')[-1]
 
     #need to find out how many energy points we need to make space for
     det_data = np.array(parent._data['primary'][det_nm][uid]['data'], dtype=np.float32)
@@ -164,4 +164,6 @@ def modify_stack_nxdata_group(parent, data_nxgrp, doc, scan_type):
     init_dat_arr[:] = np.NAN
 
     init_dat_arr[0] = det_data
-    _dataset(data_nxgrp, 'data', init_dat_arr, 'NX_NUMBER')
+    #_dataset(data_nxgrp, 'data', init_dat_arr, 'NX_NUMBER')
+    _dset = _dataset(data_nxgrp, 'data', init_dat_arr, 'NX_NUMBER')
+    _string_attr(_dset, 'signal', '1')

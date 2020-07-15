@@ -41,8 +41,8 @@ def modify_2posner_ctrl_data_grps(parent, nxgrp, doc, scan_type):
     # y_posnr_src = rois[SPDB_Y]['SRC']
     uid = parent.get_current_uid()
 
-    xnpoints = rois[SPDB_X][NPOINTS]
-    ynpoints = rois[SPDB_Y][NPOINTS]
+    xnpoints = int(rois[SPDB_X][NPOINTS])
+    ynpoints = int(rois[SPDB_Y][NPOINTS])
     ttlpnts = xnpoints * ynpoints
     prim_data_lst = parent._data['primary'][x_src][uid]['data']
     if (len(prim_data_lst) < ttlpnts):
@@ -61,7 +61,7 @@ def modify_2posner_ctrl_data_grps(parent, nxgrp, doc, scan_type):
     _dataset(nxgrp, x_posnr_nm, xdata, 'NX_FLOAT')
 
     # this should be an array the same shape as the 'data' group in NXdata filled with the storagering current
-    sr_data = np.array(parent._data['primary'][parent.get_devname(DNM_RING_CURRENT) + '_val'][uid]['data'], dtype=np.float32)
+    sr_data = np.array(parent._data['primary'][parent.get_devname(DNM_RING_CURRENT)][uid]['data'], dtype=np.float32)
     if (resize_data):
         sr_data = np.resize(sr_data, (ttlpnts,))
     _dataset(nxgrp, 'data', np.reshape(sr_data, (ynpoints, xnpoints)), 'NX_NUMBER')
@@ -99,8 +99,8 @@ def modify_base_2d_nxdata_group(parent, data_nxgrp, doc, scan_type):
     y_src = parent.get_devname(rois[SPDB_Y][POSITIONER])
     y_posnr_nm = parent.fix_posner_nm(rois[SPDB_Y][POSITIONER])
     uid = parent.get_current_uid()
-    xnpoints = rois[SPDB_X][NPOINTS]
-    ynpoints = rois[SPDB_Y][NPOINTS]
+    xnpoints = int(rois[SPDB_X][NPOINTS])
+    ynpoints = int(rois[SPDB_Y][NPOINTS])
     ttlpnts = xnpoints * ynpoints
     prim_data_lst = parent._data['primary'][x_src][uid]['data']
 
@@ -122,10 +122,11 @@ def modify_base_2d_nxdata_group(parent, data_nxgrp, doc, scan_type):
     _string_attr(data_nxgrp, 'axes', [y_posnr_nm, x_posnr_nm])
     _string_attr(data_nxgrp, 'signal', 'data')
 
-    det_nm = parent.get_primary_det_nm(doc['run_start'])
+    #det_nm = parent.get_primary_det_nm(doc['run_start'])
+    det_nm = data_nxgrp.name.split('/')[-1]
 
     three_d_scans = [scan_types.DETECTOR_IMAGE, scan_types.OSA_IMAGE, scan_types.OSA_FOCUS, scan_types.SAMPLE_FOCUS, scan_types.SAMPLE_IMAGE_STACK, \
-                     scan_types.COARSE_IMAGE_SCAN, scan_types.COARSE_GONI_SCAN, scan_types.TOMOGRAPHY_SCAN]
+                     scan_types.COARSE_IMAGE, scan_types.COARSE_GONI, scan_types.TOMOGRAPHY]
     if(scan_types(scan_type) in three_d_scans):
         # det_data = np.array(parent._data['primary'][det_nm]['data'], dtype=np.float32).reshape((1, ynpoints, xnpoints))
         det_data = np.array(parent._data['primary'][det_nm][uid]['data'], dtype=np.float32)
@@ -145,7 +146,8 @@ def modify_base_2d_nxdata_group(parent, data_nxgrp, doc, scan_type):
         # det_data = np.array(parent._data['primary'][det_nm]['data'], dtype=np.float32).reshape((ynpoints, xnpoints))
         det_data = np.array(parent._data['primary'][det_nm][uid]['data'], dtype=np.float32)
 
-    _dataset(data_nxgrp, 'data', det_data, 'NX_NUMBER')
+    _dset = _dataset(data_nxgrp, 'data', det_data, 'NX_NUMBER')
+    _string_attr(_dset, 'signal', '1')
 
 
 def modify_base_2d_instrument_group(parent, inst_nxgrp, doc, scan_type):
@@ -158,23 +160,23 @@ def modify_base_2d_instrument_group(parent, inst_nxgrp, doc, scan_type):
     '''
     rois = parent.get_rois_from_current_md(doc['run_start'])
     dwell = parent._cur_scan_md[doc['run_start']]['dwell'] * 0.001
-    det_nm = parent.get_primary_det_nm(doc['run_start'])
+    #det_nm = parent.get_primary_det_nm(doc['run_start'])
     scan_type = parent.get_stxm_scan_type(doc['run_start'])
     uid = parent.get_current_uid()
-    ttl_pnts = rois[SPDB_X][NPOINTS] * rois[SPDB_Y][NPOINTS]
+    ttlpnts = int(rois[SPDB_X][NPOINTS] * rois[SPDB_Y][NPOINTS])
 
-    det_data = np.array(parent._data['primary'][det_nm][uid]['data'])  # .reshape((ynpoints, xnpoints))
-    parent.make_detector(inst_nxgrp, parent._primary_det_prefix, det_data, dwell, ttl_pnts, units='counts')
+    #det_data = np.array(parent._data['primary'][det_nm][uid]['data'])  # .reshape((ynpoints, xnpoints))
+    #parent.make_detector(inst_nxgrp, parent._detector_names, det_data, dwell, ttlpnts, units='counts')
 
-    sample_x_data = make_1d_array(ttl_pnts, parent.get_sample_x_data('start'))
-    sample_y_data = make_1d_array(ttl_pnts, parent.get_sample_y_data('start'))
-    parent.make_detector(inst_nxgrp, nxkd.SAMPLE_X, sample_x_data, dwell, ttl_pnts, units='um')
-    parent.make_detector(inst_nxgrp, nxkd.SAMPLE_Y, sample_y_data, dwell, ttl_pnts, units='um')
+    sample_x_data = make_1d_array(ttlpnts, parent.get_sample_x_data('start'))
+    sample_y_data = make_1d_array(ttlpnts, parent.get_sample_y_data('start'))
+    parent.make_detector(inst_nxgrp, nxkd.SAMPLE_X, sample_x_data, dwell, ttlpnts, units='um')
+    parent.make_detector(inst_nxgrp, nxkd.SAMPLE_Y, sample_y_data, dwell, ttlpnts, units='um')
 
     if (scan_type in two_posner_scans):
-        xnpoints = rois[SPDB_X][NPOINTS]
-        ynpoints = rois[SPDB_Y][NPOINTS]
-        ttl_pnts = rois[SPDB_X][NPOINTS] * rois[SPDB_Y][NPOINTS]
+        xnpoints = int(rois[SPDB_X][NPOINTS])
+        ynpoints = int(rois[SPDB_Y][NPOINTS])
+        ttlpnts = int(rois[SPDB_X][NPOINTS] * rois[SPDB_Y][NPOINTS])
 
         x_src = parent.get_devname(rois[SPDB_X][POSITIONER])
         x_posnr_nm = parent.fix_posner_nm(rois[SPDB_X][POSITIONER])
@@ -185,5 +187,7 @@ def modify_base_2d_instrument_group(parent, inst_nxgrp, doc, scan_type):
         xdata = parent._data['primary'][x_src][uid]['data'][0:xnpoints]
         # ydata is every ynpoint
         ydata = parent._data['primary'][y_src][uid]['data'][0::ynpoints]
-        parent.make_detector(inst_nxgrp, y_posnr_nm, np.tile(ydata, ynpoints), dwell, ttl_pnts, units='um')
-        parent.make_detector(inst_nxgrp, x_posnr_nm, np.tile(xdata, xnpoints), dwell, ttl_pnts, units='um')
+        parent.make_detector(inst_nxgrp, y_posnr_nm, np.tile(ydata, ynpoints), dwell, ttlpnts, units='um')
+        parent.make_detector(inst_nxgrp, x_posnr_nm, np.tile(xdata, xnpoints), dwell, ttlpnts, units='um')
+
+

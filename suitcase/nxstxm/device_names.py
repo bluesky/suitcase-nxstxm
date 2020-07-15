@@ -125,4 +125,3 @@ DNM_SET_XY_LOCKPOSITION     = 'Set_XY_lockposition'
 DNM_SET_Z_LOCKPOSITION      = 'Set_Z_lockposition'
 DNM_MONO_EV_FBK             = 'Mono_ev_fbk'
 DNM_MONO_GRATING_FBK        = 'Mono_grating_fbk'
-

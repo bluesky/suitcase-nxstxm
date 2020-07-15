@@ -36,8 +36,8 @@ def modify_line_spectra_ctrl_data_grps(parent, nxgrp, doc, scan_type):
     y_posnr_nm = parent.fix_posner_nm(dct_get(rois, SPDB_YPOSITIONER))
     uid = parent.get_current_uid()
 
-    xnpoints = dct_get(rois, SPDB_XNPOINTS)
-    ynpoints = dct_get(rois, SPDB_YNPOINTS)
+    xnpoints = int(dct_get(rois, SPDB_XNPOINTS))
+    ynpoints = int(dct_get(rois, SPDB_YNPOINTS))
 
     evs = dct_get(parent._wdg_com, SPDB_SINGLE_LST_EV_ROIS)
     num_ev_points = len(evs)
@@ -82,7 +82,7 @@ def modify_line_spectra_ctrl_data_grps(parent, nxgrp, doc, scan_type):
     _dataset(nxgrp, 'energy', evdata, 'NX_FLOAT')
 
     # this should be an array the same shape as the 'data' group in NXdata filled with the storagering current
-    ring_cur_signame = parent.get_devname(DNM_RING_CURRENT) + '_val'
+    ring_cur_signame = parent.get_devname(DNM_RING_CURRENT)
     if(ring_cur_signame not in parent._data.keys()):
         #use the baseline start/stop values and create a sequence from start to stop
         strt, stp = parent._data['baseline'][ring_cur_signame][uid]['data']
@@ -116,8 +116,8 @@ def modify_line_spectra_nxdata_group(parent, data_nxgrp, doc, scan_type):
 
     uid = parent.get_current_uid()
 
-    xnpoints = dct_get(rois, SPDB_XNPOINTS)
-    ynpoints = dct_get(rois, SPDB_YNPOINTS)
+    xnpoints = int(dct_get(rois, SPDB_XNPOINTS))
+    ynpoints = int(dct_get(rois, SPDB_YNPOINTS))
     evs = dct_get(parent._wdg_com, SPDB_SINGLE_LST_EV_ROIS)
     num_ev_points = len(evs)
     evdata = np.array(evs, dtype=np.float32)
@@ -158,13 +158,14 @@ def modify_line_spectra_nxdata_group(parent, data_nxgrp, doc, scan_type):
     _string_attr(data_nxgrp, 'axes', ['energy', 'line_position'])
     _string_attr(data_nxgrp, 'signal', 'data')
 
-    det_nm = parent.get_primary_det_nm(doc['run_start'])
+    det_nm = data_nxgrp.name.split('/')[-1]
     det_data = np.array(parent._data['primary'][det_nm][uid]['data'], dtype=np.float32)
     if (resize_data):
         det_data = parent.fix_aborted_data(det_data, ttlpnts)
 
     det_data = np.transpose(det_data)
-    _dataset(data_nxgrp, 'data', det_data, 'NX_NUMBER')
+    _dset = _dataset(data_nxgrp, 'data', det_data, 'NX_NUMBER')
+    _string_attr(_dset, 'signal', '1')
 
 
 def modify_line_spectra_instrument_group(parent, inst_nxgrp, doc, scan_type):
@@ -177,11 +178,11 @@ def modify_line_spectra_instrument_group(parent, inst_nxgrp, doc, scan_type):
     '''
     rois = parent.get_rois_from_current_md(doc['run_start'])
     dwell = parent._cur_scan_md[doc['run_start']]['dwell'] * 0.001
-    det_nm = parent.get_primary_det_nm(doc['run_start'])
+    #det_nm = inst_nxgrp.name.split('/')[-1]
     scan_type = parent.get_stxm_scan_type(doc['run_start'])
 
-    xnpoints = dct_get(rois, SPDB_XNPOINTS)
-    ynpoints = dct_get(rois, SPDB_YNPOINTS)
+    xnpoints = int(dct_get(rois, SPDB_XNPOINTS))
+    ynpoints = int(dct_get(rois, SPDB_YNPOINTS))
     evs = dct_get(parent._wdg_com, SPDB_SINGLE_LST_EV_ROIS)
     num_ev_points = len(evs)
 
@@ -189,8 +190,8 @@ def modify_line_spectra_instrument_group(parent, inst_nxgrp, doc, scan_type):
     evdata = np.array(evs, dtype=np.float32)
     uid = parent.get_current_uid()
 
-    det_data = np.array(parent._data['primary'][det_nm][uid]['data'])  # .reshape((ynpoints, xnpoints))
-    parent.make_detector(inst_nxgrp, parent._primary_det_prefix, det_data, dwell, ttl_pnts, units='counts')
+    #det_data = np.array(parent._data['primary'][det_nm][uid]['data'])  # .reshape((ynpoints, xnpoints))
+    #parent.make_detector(inst_nxgrp, det_nm, det_data, dwell, ttl_pnts, units='counts')
 
     sample_x_data = make_1d_array(ttl_pnts, parent.get_sample_x_data('start'))
     sample_y_data = make_1d_array(ttl_pnts, parent.get_sample_y_data('start'))
